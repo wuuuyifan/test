@@ -48,7 +48,6 @@ export default {
   },
   methods: {
     updateKey() {
-    // 如何判断是否有余额暂不清楚，源代码用的ts代码，不太能看懂
       localStorage.apiKey = this.inputValue
       this.Key = this.inputValue
     },
