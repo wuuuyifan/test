@@ -1,5 +1,5 @@
 import express from 'express'
-// import { refresh_balance } from '../mysql/database'
+import { refresh_balance } from '../mysql/database'
 import type { RequestProps } from './types'
 import type { ChatMessage } from './chatgpt'
 import { chatConfig, chatReplyProcess, currentModel } from './chatgpt'
@@ -27,16 +27,16 @@ router.post('/chat-process', [auth, limiter], async (req, res) => {
   try {
     const { prompt, options = {}, systemMessage } = req.body as RequestProps
     let firstChunk = true
-    // const new_balance = Number(refresh_balance(req.body.key, '../../mysql/users'))
-    // if (new_balance < 0)
-    //   throw new Error('您的key余额不足')
+    const new_balance = await refresh_balance(req.body.key, process.env.DB_ADDRESS)
+    if (new_balance < 0)
+      throw new Error('您的key余额不足')
 
     await chatReplyProcess({
       message: prompt,
       lastContext: options,
       process: (chat: ChatMessage) => {
-        // if (firstChunk)
-        //   chat.text = `[余额:${new_balance}]\n ${chat.text}`
+        if (firstChunk)
+          chat.text = `[余额:${new_balance}条]\n ${chat.text}`
 
         res.write(firstChunk ? JSON.stringify(chat) : `\n${JSON.stringify(chat)}`)
         firstChunk = false

@@ -7,7 +7,7 @@ export async function update_balance(inputKey: string, dbPath: string): Promise<
 
   interface RecordType {
     key: string
-    value: number
+    balance: number
   }
 
   const query = 'SELECT * FROM users WHERE key = ?'
@@ -27,10 +27,9 @@ export async function update_balance(inputKey: string, dbPath: string): Promise<
     return '没有找到您的Key，请检查是否写错了，如果没有 请联系管理员~'
 
   const record = rows[0]
-  const value = record.value - 1
-
-  const update = 'UPDATE users SET value = ? WHERE key = ?'
-  const params2 = [value, inputKey]
+  const balance = record.balance - 1
+  const update = 'UPDATE users SET balance = ? WHERE key = ?'
+  const params2 = [balance, inputKey]
 
   await new Promise<void>((resolve, reject) => {
     db.run(update, params2, (err) => {
@@ -44,12 +43,13 @@ export async function update_balance(inputKey: string, dbPath: string): Promise<
 
   db.close()
 
-  return value
+  return balance
 }
 
 export async function refresh_balance(inputKey: string, dbPath: string) {
   try {
-    await update_balance(inputKey, dbPath)
+    const b = await update_balance(inputKey, dbPath)
+    return Number(b)
   }
   catch (err) {
     console.error(err)
